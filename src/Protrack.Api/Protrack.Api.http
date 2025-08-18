@@ -1,6 +1,0 @@
-@Protrack.Api_HostAddress = http://localhost:5277
-
-GET {{Protrack.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

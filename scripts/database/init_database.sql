@@ -36,3 +36,40 @@ values
 ('project_create_tasks',   'Create tasks',               'Allows the creation of tasks in a project',  2),
 ('project_update_tasks',   'Update tasks',               'Allows tasks in a project to be updated',    2),
 ('project_remove_tasks',   'Remove tasks',               'Allows the removal of tasks from a project', 2);
+
+--- --- --- --- --- --- users --- --- --- --- --- ---
+create table users (
+  user_id uuid not null primary key default(gen_random_uuid()),
+  username varchar(32) not null unique,
+  email_address varchar(255) not null,
+  password varchar(255) not null,
+  mfa_authenticated boolean not null default(false),
+  mfa_enabled boolean not null default(false),
+  login_attemps int not null default(5),
+  created_at timestamptz not null default(now()),
+  created_by uuid references users(user_id) on delete set null,
+  updated_at timestamptz not null default(now()),
+  updated_by uuid references users(user_id) on delete set null
+);
+
+--- --- --- --- --- --- files --- --- --- --- --- ---
+create table files (
+  file_id uuid not null primary key default(gen_random_uuid()),
+  name varchar(255) not null,
+  path varchar(255) not null,
+  is_temporal boolean not null default(true),
+  size bigint not null,
+  uploaded_at timestamptz not null default(now()),
+  uploaded_by uuid references users(user_id) on delete set null
+);
+
+--- --- --- --- --- --- users / profiles --- --- --- --- --- ---
+create table users_profiles (
+  user_profile_id serial primary key not null,
+  display_name varchar(54),
+  first_name varchar(100),
+  last_name varchar(100),
+  avatar_id uuid references files(file_id) on delete set null,
+  created_at timestamptz not null default(now()),
+  updated_at timestamptz not null default(now())
+);
