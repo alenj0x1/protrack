@@ -1,3 +1,4 @@
+using Protrack.Infrastructure.EFCore.Context;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+builder.Services.AddNpgsql<ProtrackPostgresContext>(builder.Configuration.GetConnectionString("Postgres"));
 
 var app = builder.Build();
 
