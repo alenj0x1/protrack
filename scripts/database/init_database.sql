@@ -26,7 +26,7 @@ values
 ('app_deactivate_users',   'Deactivate users',           'Allows user deactivation',                   1),
 --- app - projects                     
 ('app_create_projects',    'Create projects',            'Allows the creation of projects',            1),
-('app_update_projects',    'Update projects',            'Allows projects to be updated'.              1),
+('app_update_projects',    'Update projects',            'Allows projects to be updated',              1),
 ('app_delete_projects',    'Delete projects',            'Allows the deletion of projects',            1),
 --- project        
 ('project_update',         'Update project',             'Allows the updating of a project',           2),
@@ -40,27 +40,29 @@ values
 --- --- --- --- --- --- users --- --- --- --- --- ---
 create table users (
   user_id uuid not null primary key default(gen_random_uuid()),
-  username varchar(32) not null unique,
+  username varchar(32) not null,
   email_address varchar(255) not null,
   password varchar(255) not null,
   mfa_authenticated boolean not null default(false),
   mfa_enabled boolean not null default(false),
   login_attemps int not null default(5),
-  created_at timestamptz not null default(now()),
-  created_by uuid references users(user_id) on delete set null,
-  updated_at timestamptz not null default(now()),
-  updated_by uuid references users(user_id) on delete set null
+  created_at timestamp not null default(now()),
+  created_by uuid references users(user_id),
+  updated_at timestamp not null default(now()),
+  updated_by uuid references users(user_id),
+  deleted_at timestamp,
+  deleted_by uuid references users(user_id)
 );
 
 --- --- --- --- --- --- files --- --- --- --- --- ---
-create table files (
-  file_id uuid not null primary key default(gen_random_uuid()),
+create table app_files (
+  app_file_id uuid not null primary key default(gen_random_uuid()),
   name varchar(255) not null,
-  path varchar(255) not null,
+  relative_path varchar(255) not null,
   is_temporal boolean not null default(true),
   size bigint not null,
-  uploaded_at timestamptz not null default(now()),
-  uploaded_by uuid references users(user_id) on delete set null
+  uploaded_at timestamp not null default(now()),
+  uploaded_by uuid references users(user_id)
 );
 
 --- --- --- --- --- --- users / profiles --- --- --- --- --- ---
@@ -69,7 +71,7 @@ create table users_profiles (
   display_name varchar(54),
   first_name varchar(100),
   last_name varchar(100),
-  avatar_id uuid references files(file_id) on delete set null,
-  created_at timestamptz not null default(now()),
-  updated_at timestamptz not null default(now())
+  avatar_id uuid references app_files(app_file_id) on delete set null,
+  created_at timestamp not null default(now()),
+  updated_at timestamp not null default(now())
 );

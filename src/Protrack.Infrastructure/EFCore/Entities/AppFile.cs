@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace Protrack.Infrastructure.EFCore.Entities;
 
-public partial class FileEntity
+public partial class AppFile
 {
-    public Guid FileId { get; set; }
+    public Guid AppFileId { get; set; }
 
     public string Name { get; set; } = null!;
 
-    public string Path { get; set; } = null!;
+    public string RelativePath { get; set; } = null!;
 
     public bool IsTemporal { get; set; }
 

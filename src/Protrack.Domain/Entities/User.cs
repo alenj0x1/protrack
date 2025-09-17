@@ -16,6 +16,8 @@ public class User
     public Guid? CreatedBy { get; private set; }
     public DateTime UpdatedAt { get; private set; } = DateTimeOffset.UtcNow.DateTime;
     public Guid? UpdatedBy { get; set; }
+    public DateTime? DeletedAt { get; private set; }
+    public Guid? DeletedBy { get; private set; }
 
     private User()
     {
@@ -30,11 +32,13 @@ public class User
         private bool _mfaAuthenticated;
         private bool _mfaEnabled;
         private int _loginAttempts;
-        private Guid _createdBy = Guid.Empty;
+        private Guid _createdBy;
         private DateTime _createdAt = DateTimeOffset.UtcNow.DateTime;
-        private Guid _updatedBy = Guid.Empty;
+        private Guid _updatedBy;
         private DateTime _updatedAt = DateTimeOffset.UtcNow.DateTime;
-
+        private Guid? _deletedBy;
+        private DateTime? _deletedAt;
+        
         public Builder WithId(Guid id)
         {
             _id = id;
@@ -100,6 +104,18 @@ public class User
             _updatedAt = datetime;
             return this;
         }
+        
+        public Builder WithDeletedBy(Guid id)
+        {
+            _deletedBy = id;
+            return this;
+        }
+        
+        public Builder WithDeletedAt(DateTime datetime)
+        {
+            _deletedAt = datetime;
+            return this;
+        }
 
         public User Build()
         {
@@ -130,7 +146,9 @@ public class User
                 CreatedBy = _createdBy,
                 CreatedAt = _createdAt,
                 UpdatedBy = _updatedBy,
-                UpdatedAt = _updatedAt
+                UpdatedAt = _updatedAt,
+                DeletedBy = _deletedBy,
+                DeletedAt = _deletedAt
             };
         }
     }

@@ -27,11 +27,19 @@ public partial class User
 
     public Guid? UpdatedBy { get; set; }
 
+    public DateTime? DeletedAt { get; set; }
+
+    public Guid? DeletedBy { get; set; }
+
+    public virtual ICollection<AppFile> AppFiles { get; set; } = new List<AppFile>();
+
     public virtual User? CreatedByNavigation { get; set; }
 
-    public virtual ICollection<FileEntity> Files { get; set; } = new List<FileEntity>();
+    public virtual User? DeletedByNavigation { get; set; }
 
     public virtual ICollection<User> InverseCreatedByNavigation { get; set; } = new List<User>();
+
+    public virtual ICollection<User> InverseDeletedByNavigation { get; set; } = new List<User>();
 
     public virtual ICollection<User> InverseUpdatedByNavigation { get; set; } = new List<User>();
 

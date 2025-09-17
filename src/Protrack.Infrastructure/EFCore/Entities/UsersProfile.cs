@@ -19,5 +19,5 @@ public partial class UsersProfile
 
     public DateTime UpdatedAt { get; set; }
 
-    public virtual FileEntity? Avatar { get; set; }
+    public virtual AppFile? Avatar { get; set; }
 }

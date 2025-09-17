@@ -1,16 +1,22 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 using Protrack.Infrastructure.EFCore.Entities;
 
 namespace Protrack.Infrastructure.EFCore.Context;
 
 public partial class ProtrackPostgresContext : DbContext
 {
+    public ProtrackPostgresContext()
+    {
+    }
+
     public ProtrackPostgresContext(DbContextOptions<ProtrackPostgresContext> options)
         : base(options)
     {
     }
 
-    public virtual DbSet<FileEntity> Files { get; set; }
+    public virtual DbSet<AppFile> AppFiles { get; set; }
 
     public virtual DbSet<Scope> Scopes { get; set; }
 
@@ -20,36 +26,38 @@ public partial class ProtrackPostgresContext : DbContext
 
     public virtual DbSet<UsersProfile> UsersProfiles { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<FileEntity>(entity =>
+        modelBuilder.Entity<AppFile>(entity =>
         {
-            entity.HasKey(e => e.FileId).HasName("files_pkey");
+            entity.HasKey(e => e.AppFileId).HasName("app_files_pkey");
 
-            entity.ToTable("files");
+            entity.ToTable("app_files");
 
-            entity.Property(e => e.FileId)
+            entity.Property(e => e.AppFileId)
                 .HasDefaultValueSql("gen_random_uuid()")
-                .HasColumnName("file_id");
+                .HasColumnName("app_file_id");
             entity.Property(e => e.IsTemporal)
                 .HasDefaultValue(true)
                 .HasColumnName("is_temporal");
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .HasColumnName("name");
-            entity.Property(e => e.Path)
+            entity.Property(e => e.RelativePath)
                 .HasMaxLength(255)
-                .HasColumnName("path");
+                .HasColumnName("relative_path");
             entity.Property(e => e.Size).HasColumnName("size");
             entity.Property(e => e.UploadedAt)
                 .HasDefaultValueSql("now()")
+                .HasColumnType("timestamp without time zone")
                 .HasColumnName("uploaded_at");
             entity.Property(e => e.UploadedBy).HasColumnName("uploaded_by");
 
-            entity.HasOne(d => d.UploadedByNavigation).WithMany(p => p.Files)
+            entity.HasOne(d => d.UploadedByNavigation).WithMany(p => p.AppFiles)
                 .HasForeignKey(d => d.UploadedBy)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("files_uploaded_by_fkey");
+                .HasConstraintName("app_files_uploaded_by_fkey");
         });
 
         modelBuilder.Entity<Scope>(entity =>
@@ -102,15 +110,18 @@ public partial class ProtrackPostgresContext : DbContext
 
             entity.ToTable("users");
 
-            entity.HasIndex(e => e.Username, "users_username_key").IsUnique();
-
             entity.Property(e => e.UserId)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("user_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
+                .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.DeletedAt)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("deleted_at");
+            entity.Property(e => e.DeletedBy).HasColumnName("deleted_by");
             entity.Property(e => e.EmailAddress)
                 .HasMaxLength(255)
                 .HasColumnName("email_address");
@@ -128,6 +139,7 @@ public partial class ProtrackPostgresContext : DbContext
                 .HasColumnName("password");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
+                .HasColumnType("timestamp without time zone")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
             entity.Property(e => e.Username)
@@ -136,12 +148,14 @@ public partial class ProtrackPostgresContext : DbContext
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.InverseCreatedByNavigation)
                 .HasForeignKey(d => d.CreatedBy)
-                .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("users_created_by_fkey");
+
+            entity.HasOne(d => d.DeletedByNavigation).WithMany(p => p.InverseDeletedByNavigation)
+                .HasForeignKey(d => d.DeletedBy)
+                .HasConstraintName("users_deleted_by_fkey");
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.InverseUpdatedByNavigation)
                 .HasForeignKey(d => d.UpdatedBy)
-                .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("users_updated_by_fkey");
         });
 
@@ -155,6 +169,7 @@ public partial class ProtrackPostgresContext : DbContext
             entity.Property(e => e.AvatarId).HasColumnName("avatar_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
+                .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
             entity.Property(e => e.DisplayName)
                 .HasMaxLength(54)
@@ -167,6 +182,7 @@ public partial class ProtrackPostgresContext : DbContext
                 .HasColumnName("last_name");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("now()")
+                .HasColumnType("timestamp without time zone")
                 .HasColumnName("updated_at");
 
             entity.HasOne(d => d.Avatar).WithMany(p => p.UsersProfiles)

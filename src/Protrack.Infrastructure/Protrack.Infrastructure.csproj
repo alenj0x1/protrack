@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="EFCore\Repositories\" />
+    <ProjectReference Include="..\Protrack.Domain\Protrack.Domain.csproj" />
   </ItemGroup>
 
 </Project>
